@@ -1,6 +1,6 @@
 #!/bin/bash
 
-public_key=$(ssh-add -L)
+public_key=$(ssh-keygen -y -f /run/sandbox/fs/secrets/shared/sandbox-shared.pem)
 cat <<EOF
 {
     "sandbox_id": "$SANDBOX_ID",
