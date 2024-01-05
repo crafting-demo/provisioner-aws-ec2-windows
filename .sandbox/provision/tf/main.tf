@@ -15,6 +15,7 @@ provider "aws" {
   default_tags {
     tags = {
       Sandbox = data.external.env.result.sandbox_name
+      SandboxID = data.external.env.result.sandbox_id
     }
   }
 }
