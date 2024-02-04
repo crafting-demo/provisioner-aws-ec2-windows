@@ -27,6 +27,7 @@ data "aws_caller_identity" "current" {}
 resource "aws_instance" "vm" {
   launch_template {
     name = var.launch_template_name
+    version = var.launch_template_version
   }
   get_password_data      = true
   user_data = <<-EOT
