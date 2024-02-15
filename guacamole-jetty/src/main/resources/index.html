@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Guacamole Frontend</title>
+        <script type="text/javascript" src="guacamole-common-js/all.min.js"></script>
+    </head>
+
+    <body>
+        <script type="text/javascript"> /* <![CDATA[ */
+
+            // Instantiate client, using an HTTP tunnel for communications.
+            var guac = new Guacamole.Client(
+                new Guacamole.WebSocketTunnel("rdp")
+            );
+
+            var elem = guac.getDisplay().getElement();
+
+            document.body.appendChild(elem);
+
+            var mouse = new Guacamole.Mouse(elem);
+
+            mouse.onmousedown = 
+            mouse.onmouseup   =
+            mouse.onmousemove = function(mouseState) {
+                guac.sendMouseState(mouseState);
+            };
+
+            // Keyboard
+            var keyboard = new Guacamole.Keyboard(document);
+
+            keyboard.onkeydown = function (keysym) {
+                guac.sendKeyEvent(1, keysym);
+            };
+
+            keyboard.onkeyup = function (keysym) {
+                guac.sendKeyEvent(0, keysym);
+            };
+
+            // Error handler
+            guac.onerror = function(error) {
+                alert(error);
+            };
+
+            var observer = new window.ResizeObserver(function (entries) {
+                window.requestAnimationFrame(function () {
+                    if (!entries.length) return;
+                    var rc = entries[0].contentRect;
+                    guac.sendSize(rc.width, rc.height);
+                });
+            });
+            observer.observe(elem);
+
+            // Connect
+            guac.connect();
+
+            // Disconnect on close
+            window.onunload = function() {
+                observer.disconnect();
+                guac.disconnect();
+            }
+
+        /* ]]> */ </script>
+    </body>
+
+</html>
