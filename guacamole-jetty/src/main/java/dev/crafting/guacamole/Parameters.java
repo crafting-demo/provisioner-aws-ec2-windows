@@ -1,15 +1,19 @@
 package dev.crafting.guacamole;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
 
 public class Parameters {
+    private static final String CONFIG = "/guacamole/config.properties";
 
-    // The protocol for guacd to connect.
-    public String protocol;
+    private static final String PROTOCOL = "rdp";
 
     // The hostname of the remote server that guacd should connect.
     public String hostname;
@@ -23,12 +27,21 @@ public class Parameters {
     private static Parameters _shared = new Parameters();
 
     private Parameters() {
-        protocol = "rdp";
-        hostname = "localhost";
+        Properties properties = new Properties();
+        try {            
+            // Load properties from file
+            FileInputStream fis = new FileInputStream(CONFIG);
+            properties.load(fis);
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        hostname = properties.getProperty("hostname", "localhost");
+        username = properties.getProperty("username", "Administrator");
+        password = properties.getProperty("password", "");
     }
 
     private Parameters(Parameters from) {
-        protocol = from.protocol;
         hostname = from.hostname;
         username = from.username;
         password = from.password;
@@ -42,10 +55,22 @@ public class Parameters {
 
     public static void update(Map<String, String> params) {
         synchronized(Parameters.class) {
-            _shared.protocol = paramNotEmpty(params, "protocol", _shared.protocol);
             _shared.hostname = paramNotEmpty(params, "hostname", _shared.hostname);
             _shared.username = paramEmptyAsNull(params, "username", _shared.username);
             _shared.password = paramEmptyAsNull(params, "password", _shared.password);
+
+            try {
+                Properties properties = new Properties();
+                properties.setProperty("hostname", _shared.hostname);
+                properties.setProperty("username", _shared.username);
+                properties.setProperty("password", _shared.password);
+    
+                FileOutputStream fos = new FileOutputStream(CONFIG);
+                properties.store(fos, "parameters");
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }            
         }
     }
 
@@ -66,7 +91,7 @@ public class Parameters {
     }
 
     public void apply(GuacamoleConfiguration config) {
-        config.setProtocol(protocol);
+        config.setProtocol(PROTOCOL);
         config.setParameter("hostname", hostname);
         if (username != null) {
             config.setParameter("username", username);
@@ -79,7 +104,7 @@ public class Parameters {
     public String formData() throws UnsupportedEncodingException {
         StringBuilder result = new StringBuilder();
         result.append("protocol=");
-        result.append(URLEncoder.encode(protocol, "UTF-8"));
+        result.append(URLEncoder.encode(PROTOCOL, "UTF-8"));
         result.append("&hostname=");
         result.append(URLEncoder.encode(hostname, "UTF-8"));
         if (username != null) {
@@ -92,5 +117,4 @@ public class Parameters {
         }
         return result.toString();
     }
-
 }
