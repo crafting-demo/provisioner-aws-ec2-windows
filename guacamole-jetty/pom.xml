@@ -51,7 +51,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>dev.crafting.guacamole.WebServer</mainClass>
+                            <mainClass>dev.crafting.guacamole.Application</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

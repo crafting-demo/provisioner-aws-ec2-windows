@@ -1,6 +1,7 @@
 package dev.crafting.guacamole;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
@@ -14,33 +15,51 @@ import org.apache.guacamole.protocol.GuacamoleConfiguration;
 import org.apache.guacamole.websocket.GuacamoleWebSocketTunnelEndpoint;
 
 public class WebsocketTunnel extends GuacamoleWebSocketTunnelEndpoint {
+    private static String guacdHost = "localhost";
+    private static int guacdPort = 4822;
+
+    static {
+        String value = System.getenv("GUACD_PORT");
+        if (value != null) {
+            try {
+                int port = Integer.parseInt(value);
+                if (port > 0) {
+                    guacdPort = port;
+                }
+            } catch (NumberFormatException e) {
+                // Ignore.
+            }
+        }
+        value = System.getenv("GUACD_HOST");
+        if (value != null) {
+            guacdHost = value;
+        }
+    }
+
     @Override
     protected GuacamoleTunnel createTunnel(Session session,
             EndpointConfig endpointConfig) throws GuacamoleException {
-
         GuacamoleConfiguration config = new GuacamoleConfiguration();
-        config.setProtocol("rdp");
-        config.setParameter("hostname", "localhost");
+        Parameters.replica().apply(config);
         config.setParameter("ignore-cert", "true");
         config.setParameter("resize-method", "display-update");
         config.setParameter("enable-font-smoothing", "true");
         config.setParameter("force-lossless", "true");
-        // get other params from url querystring
-        String[] allowedParams = new String[] { "username", "password", "width", "height" };
+        // Get other params from URL query.
+        List<String> allowedParams = Arrays.asList("width", "height");
         String queryString = session.getRequestURI().getQuery();
         String[] params = queryString.split("&");
         for (String param : params) {
             String[] parts = param.split("=");
-            if (parts.length == 2 && Arrays.asList(allowedParams).contains(parts[0])) {
+            if (parts.length == 2 && allowedParams.contains(parts[0])) {
                 config.setParameter(parts[0], parts[1]);
             }
         }
 
         // Connect to guacd - everything is hard-coded here.
         GuacamoleSocket socket = new ConfiguredGuacamoleSocket(
-                new InetGuacamoleSocket("localhost", 4822),
-                config
-        );
+                new InetGuacamoleSocket(guacdHost, guacdPort),
+                config);
 
         return new SimpleGuacamoleTunnel(socket);
     }
