@@ -21,6 +21,6 @@ wait_for_resource
 # call config server to create/update the Windows credentials.
 curl -X PUT http://guacamole:8081/params --data-urlencode "hostname=$(resource_output public_dns)" --data-urlencode "username=Administrator" --data-urlencode "password=$(resource_output password)"
 
-# TODO: figure out a better to run this script one-off and on-demand re-runable.
+# TODO: figure out a better way to run this script one-off and on-demand re-runable.
 sleep infinity
 
