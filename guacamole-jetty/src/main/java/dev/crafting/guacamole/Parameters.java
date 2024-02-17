@@ -66,7 +66,7 @@ public class Parameters {
                 properties.setProperty("password", _shared.password);
     
                 FileOutputStream fos = new FileOutputStream(CONFIG);
-                properties.store(fos, "parameters");
+                properties.store(fos, "RDP parameters");
                 fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
