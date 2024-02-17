@@ -38,7 +38,7 @@ public class Parameters {
         }
         hostname = properties.getProperty("hostname", "localhost");
         username = properties.getProperty("username", "Administrator");
-        password = properties.getProperty("password", "");
+        password = properties.getProperty("password");
     }
 
     private Parameters(Parameters from) {
