@@ -19,7 +19,7 @@ dependencies:
 To initialize the database:
 
 ```sh
-mysql -h guacamoledb --user=guacamole --password=guacamole guacamole <initdb.sql
+mysql -h guacamoledb --user=root guacamole <initdb.sql
 ```
 
 Then take a snapshot:

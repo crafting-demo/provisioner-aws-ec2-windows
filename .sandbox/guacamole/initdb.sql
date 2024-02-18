@@ -664,3 +664,6 @@ FROM (
 JOIN guacamole_entity          ON permissions.username = guacamole_entity.name AND guacamole_entity.type = 'USER'
 JOIN guacamole_entity affected ON permissions.affected_username = affected.name AND guacamole_entity.type = 'USER'
 JOIN guacamole_user            ON guacamole_user.entity_id = affected.entity_id;
+
+-- Triggers
+CREATE TRIGGER new_entity_for_connection AFTER INSERT ON guacamole_entity FOR EACH ROW REPLACE INTO guacamole_connection_permission (entity_id,connection_id,permission) VALUES (NEW.entity_id, 1, "READ");
