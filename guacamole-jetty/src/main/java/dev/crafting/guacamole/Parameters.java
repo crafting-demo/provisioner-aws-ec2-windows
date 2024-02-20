@@ -11,6 +11,14 @@ import java.util.Properties;
 import org.apache.guacamole.protocol.GuacamoleConfiguration;
 
 public class Parameters {
+    private static String configFile;
+    static {
+        configFile = System.getenv("GUACAMOLE_PARAMETERS_FILE");
+        if (configFile == null || configFile.isEmpty()) {
+            configFile = "/etc/guacamole/parameters.properties";
+        }
+    }
+
     // The protocol for guacd to connect.
     public String protocol;
 
@@ -23,19 +31,11 @@ public class Parameters {
     // The password for authentication.
     public String password;
 
-    private static String configFile;
     private static Parameters _shared = new Parameters();
 
-    static Parameters() {
-        configFile = System.getenv("GUACAMOLE_PARAMETERS_FILE");
-        if (configFile == null || configFile.isEmpty()) {
-            configFile = "/etc/guacamole/parameters.properties";
-        } 
-    }
-
     private Parameters() {
-        Properties properties = new Properties();        
-        try (FileInputStream fis = new FileInputStream(Parameters.ConfigFile());) {            
+        Properties properties = new Properties();
+        try (FileInputStream fis = new FileInputStream(Parameters.configFile);) {
             properties.load(fis);
         } catch (IOException e) {
             System.err.println(e.getMessage());
@@ -54,19 +54,19 @@ public class Parameters {
     }
 
     public static Parameters replica() {
-        synchronized(Parameters.class) {
+        synchronized (Parameters.class) {
             return new Parameters(_shared);
         }
     }
 
     public static void update(Map<String, String> params) {
-        synchronized(Parameters.class) {
+        synchronized (Parameters.class) {
             _shared.protocol = paramNotEmpty(params, "protocol", _shared.protocol);
             _shared.hostname = paramNotEmpty(params, "hostname", _shared.hostname);
             _shared.username = paramEmptyAsNull(params, "username", _shared.username);
             _shared.password = paramEmptyAsNull(params, "password", _shared.password);
 
-            try (FileOutputStream fos = new FileOutputStream(Parameters.ConfigFile())) {
+            try (FileOutputStream fos = new FileOutputStream(Parameters.configFile)) {
                 Properties properties = new Properties();
                 properties.setProperty("protocol", _shared.protocol);
                 properties.setProperty("hostname", _shared.hostname);
@@ -75,7 +75,7 @@ public class Parameters {
                 properties.store(fos, "RDP parameters");
             } catch (IOException e) {
                 System.err.println(e.getMessage());
-            }            
+            }
         }
     }
 
