@@ -6,8 +6,6 @@ FROM guacamole/guacd:1.5.4
 USER root
 RUN apk update && apk add openjdk11-jre-headless bash && apk cache clean
 COPY --from=BUILDER /src/target/guacamole-jetty-1.0.0-jar-with-dependencies.jar /guacamole-jetty.jar
-COPY config.properties /guacamole/config.properties
-RUN chmod 666 /guacamole/config.properties
 ADD start.sh /
 USER guacd
 ENTRYPOINT ["/start.sh"]

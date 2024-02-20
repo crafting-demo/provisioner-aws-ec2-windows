@@ -23,14 +23,22 @@ public class Parameters {
     // The password for authentication.
     public String password;
 
+    private static String configFile;
     private static Parameters _shared = new Parameters();
+
+    static Parameters() {
+        configFile = System.getenv("GUACAMOLE_PARAMETERS_FILE");
+        if (configFile == null || configFile.isEmpty()) {
+            configFile = "/etc/guacamole/parameters.properties";
+        } 
+    }
 
     private Parameters() {
         Properties properties = new Properties();        
         try (FileInputStream fis = new FileInputStream(Parameters.ConfigFile());) {            
             properties.load(fis);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
         protocol = properties.getProperty("protocol", "rdp");
         hostname = properties.getProperty("hostname", "localhost");
@@ -43,14 +51,6 @@ public class Parameters {
         hostname = from.hostname;
         username = from.username;
         password = from.password;
-    }
-
-    public static String ConfigFile() {
-        String configFile = System.getenv("GUACAMOLE_PARAMETERS");
-        if (configFile == null || configFile.isEmpty()) {
-            configFile = "/etc/guacamole/parameters.properties";
-        }
-        return configFile;
     }
 
     public static Parameters replica() {
@@ -74,7 +74,7 @@ public class Parameters {
                 properties.setProperty("password", _shared.password);
                 properties.store(fos, "RDP parameters");
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
             }            
         }
     }
