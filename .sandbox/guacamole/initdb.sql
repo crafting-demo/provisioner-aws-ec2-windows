@@ -667,5 +667,8 @@ JOIN guacamole_user            ON guacamole_user.entity_id = affected.entity_id;
 
 -- Triggers
 
--- allow all users to access the RDP via automatically linking the newly created user to the existing RDP connection. 
-CREATE TRIGGER new_entity_for_connection AFTER INSERT ON guacamole_entity FOR EACH ROW REPLACE INTO guacamole_connection_permission (entity_id,connection_id,permission) VALUES (NEW.entity_id, 1, "READ");
+-- allow all users to access the RDP via automatically linking the newly created user to the existing RDP connection(s). 
+CREATE TRIGGER new_entity_for_connection AFTER INSERT ON guacamole_entity 
+FOR EACH ROW 
+REPLACE INTO guacamole_connection_permission (entity_id,connection_id,permission) 
+SELECT NEW.entity_id, connection_id, "READ" FROM guacamole_connection;
