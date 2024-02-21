@@ -42,7 +42,7 @@ public class Parameters {
         }
         protocol = properties.getProperty("protocol", "rdp");
         hostname = properties.getProperty("hostname", "localhost");
-        username = properties.getProperty("username", "Administrator");
+        username = properties.getProperty("username");
         password = properties.getProperty("password");
     }
 
