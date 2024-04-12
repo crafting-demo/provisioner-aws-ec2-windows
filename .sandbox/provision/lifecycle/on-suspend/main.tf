@@ -10,13 +10,13 @@ terraform {
 }
 
 data "external" "env" {
-  program = ["${path.module}/env.sh"]
+  program = ["${path.module}/../common/env.sh"]
 }
 
 provider "aws" {
   default_tags {
     tags = {
-      Sandbox = data.external.env.result.sandbox_name
+      Sandbox   = data.external.env.result.sandbox_name
       SandboxID = data.external.env.result.sandbox_id
     }
   }
@@ -29,5 +29,5 @@ data "aws_caller_identity" "current" {}
 resource "aws_ebs_volume" "data_volume" {
   size              = 10
   type              = "gp3"
-  availability_zone = "us-west-1a"
+  availability_zone = data.external.env.result.availablity_zone
 }
