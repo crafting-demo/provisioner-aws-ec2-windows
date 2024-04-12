@@ -13,10 +13,6 @@ data "external" "env" {
   program = ["${path.module}/../common/env.sh"]
 }
 
-module "variables" {
-  source = "../modules/variables"
-}
-
 provider "aws" {
   default_tags {
     tags = {
@@ -38,7 +34,7 @@ resource "aws_ebs_volume" "data_volume" {
 
 resource "aws_instance" "vm" {
   launch_template {
-    name = variables.var.launch_template_name
+    name = var.launch_template_name
     # version = var.launch_template_version
   }
   get_password_data = true
