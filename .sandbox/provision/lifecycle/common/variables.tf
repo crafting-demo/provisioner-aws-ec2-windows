@@ -8,5 +8,5 @@ variable "launch_template_version" {
 
 variable "keypair_file" {
   #default = "/run/sandbox/fs/secrets/shared/sandbox-shared.pem"
-  default = "/run/sandbox/fs/secrets/shared/employ-temp.pem"
+  default = "/run/sandbox/fs/secrets/shared/sandbox-temp.pem"
 }
