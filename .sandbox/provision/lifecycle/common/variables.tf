@@ -1,6 +1,5 @@
 variable "launch_template_name" {
-  #default = "sandbox-windows-vm"
-  default = "crafting-windows-vm"
+  default = "sandbox-windows-vm"
 }
 
 variable "launch_template_version" {
