@@ -65,6 +65,23 @@ resource "aws_instance" "vm" {
     # Ensure the administrators_authorized_keys file complies with the permissions requirement.
     icacls.exe ""C:\ProgramData\ssh\administrators_authorized_keys"" /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
 
+# Generate the init-volume.ps1 file
+    @'
+try {
+  $disk=Get-Disk -Number 1
+  if ($disk.NumberOfPartitions -eq 0) {
+    Write-Host "Initializing the disk"
+    Initialize-Disk -Number 1 -PartitionStyle GPT -ErrorAction Stop
+    New-Partition -AssignDriveLetter -UseMaximumSize -DiskNumber 1 -ErrorAction Stop
+    
+    Format-Volume -FileSystem NTFS -NewFileSystemLabel DevVolume -DriveLetter D -ErrorAction Stop
+  }
+} catch {
+  Write-Host "Error occurred: $_"
+  exit 1
+}
+'@ | Out-File -FilePath C:\init-volume.ps1
+
     # Generate dev certificate
     dotnet dev-certs https -v
     </powershell>
