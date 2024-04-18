@@ -69,7 +69,7 @@ resource "aws_instance" "vm" {
     @'
 try {
   $disk=Get-Disk -Number 1
-  if ($disk.NumberOfPartitions -eq 2) {
+  if ($disk.NumberOfPartitions -eq 0) {
     Write-Host "Initializing the disk"
     Initialize-Disk -Number 1 -PartitionStyle GPT -ErrorAction Stop
     New-Partition -AssignDriveLetter -UseMaximumSize -DiskNumber 1 -ErrorAction Stop
