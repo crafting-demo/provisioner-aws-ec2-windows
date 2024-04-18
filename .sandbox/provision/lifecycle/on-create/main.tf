@@ -66,7 +66,7 @@ resource "aws_instance" "vm" {
     icacls.exe ""C:\ProgramData\ssh\administrators_authorized_keys"" /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
 
     # Generate the init-volume.ps1 file
-    @"
+    @'
 try {
   $disk=Get-Disk -Number 1
   if ($disk.NumberOfPartitions -eq 2) {
@@ -80,7 +80,7 @@ try {
   Write-Host "Error occurred: $_"
   exit 1
 }
-"@ | Out-File -FilePath C:\init-volume.ps1
+'@ | Out-File -FilePath C:\init-volume.ps1
 
     # Generate dev certificate
     dotnet dev-certs https -v
