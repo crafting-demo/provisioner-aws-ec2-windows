@@ -80,7 +80,7 @@ try {
   Write-Host "Error occurred: $_"
   exit 1
 }
-    "@ | Out-File -FilePath C:\init-volume.ps1
+"@ | Out-File -FilePath C:\init-volume.ps1
 
     # Generate dev certificate
     dotnet dev-certs https -v
