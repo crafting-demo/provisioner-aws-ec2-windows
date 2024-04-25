@@ -1,6 +1,6 @@
 # Lifecycle based Terraform solution
 
-Unlike the built-in Terraform resource provider, this solution leverages Sandbox's lifecycle handlers and Terraform to provision the Windows resources in Amazon EC2. 
+This solution leverages Sandbox's Terraform resource to provision the Windows resources in Amazon EC2. 
 
 This solution consists of two major resources:
 - EC2 instance (Windows VM)

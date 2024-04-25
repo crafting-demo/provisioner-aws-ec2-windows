@@ -1,0 +1,36 @@
+workspaces:
+  - name: provisioner
+    checkouts:
+      - path: provisioner-aws-ec2-windows
+        repo:
+          git: https://github.com/crafting-demo/provisioner-aws-ec2-windows.git
+    env:
+      - AWS_CONFIG_FILE=/run/sandbox/fs/secrets/shared/AWS-CONFIG
+      - AWS_DEFAULT_REGION=us-east-2
+      - AVAILABILITY_ZONE=us-east-2a
+overview: |
+  # Development with a Windows VM
+resources:
+  - name: windows
+    brief: EC2 Windows VM
+    details: |
+      EC2 Windows VM:
+
+      - Hostname: {{state.public_dns.value}}
+      - PublicIP: {{state.public_ip.value}}
+      ```
+      auto connect:i:1
+      full address:s:{{state.public_dns.value}}
+      username:s:Administrator
+      ```
+
+      Password can be found in `/run/sandbox/fs/resources/windows/state`.
+    terraform:
+      workspace: provisioner
+      dir: provisioner-aws-ec2-windows/.sandbox/provision/tf-lifecycle
+      run:
+        timeout: 30m0s
+      save_state: true
+      on_suspend:
+        env:
+          - "TF_VAR_suspended=true"
