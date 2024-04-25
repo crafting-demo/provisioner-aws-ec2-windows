@@ -27,7 +27,7 @@ data "aws_caller_identity" "current" {}
 resource "aws_ebs_volume" "data_volume" {
   size              = 10
   type              = "gp3"
-  availability_zone = data.external.env.result.availablity_zone
+  availability_zone = var.availablity_zone
 }
 
 resource "aws_instance" "vm" {

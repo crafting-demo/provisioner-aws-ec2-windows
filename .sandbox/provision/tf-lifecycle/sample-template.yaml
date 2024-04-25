@@ -30,6 +30,8 @@ resources:
       dir: provisioner-aws-ec2-windows/.sandbox/provision/tf-lifecycle
       run:
         timeout: 30m0s
+        env:
+          - "TF_VAR_availablity_zone=us-east-2a"
       save_state: true
       on_suspend:
         env:

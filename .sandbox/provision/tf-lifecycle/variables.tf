@@ -17,5 +17,5 @@ variable "suspended" {
 
 variable "availablity_zone" {
   type = string
-  default = ""
+  default = "us-east-2a"
 }
