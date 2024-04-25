@@ -31,7 +31,7 @@ resource "aws_ebs_volume" "data_volume" {
 }
 
 resource "aws_instance" "vm" {
-  count = var.vm_count
+  count = var.suspended ? 0 : 1
   launch_template {
     name = var.launch_template_name
     version = var.launch_template_version
@@ -89,7 +89,7 @@ EOT
 }
 
 resource "aws_volume_attachment" "data_volume_attachment" {
-  count = var.vm_count
+  count = var.suspended ? 0 : 1
   device_name = "/dev/xvdf"
   instance_id = aws_instance.vm[0].id
   volume_id   = aws_ebs_volume.data_volume.id
