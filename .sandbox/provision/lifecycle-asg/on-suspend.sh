@@ -4,8 +4,8 @@ source ./common.sh
 
 # adjust the terminal output settings 
 redirect_output on-suspend.log
-INSTANCE_ID=$(stored_instance_id)
-VOLUME_ID=$(stored_volume_id)
+INSTANCE_ID="$(stored_instance_id)"
+VOLUME_ID="$(stored_volume_id)"
 aws ec2 terminate-instances --instance-ids $INSTANCE_ID
 
 restore_output

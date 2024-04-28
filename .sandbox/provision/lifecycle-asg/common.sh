@@ -18,7 +18,7 @@ function stored_volume_id() {
         echo "Can not restore the volume ID as the state file does not exist"
         exit 1
     fi
-    echo $(jq -r .volume_id .windows-state.json)
+    jq -r .volume_id .windows-state.json
 }
 
 function stored_instance_id() {
@@ -27,5 +27,5 @@ function stored_instance_id() {
         exit 1
     fi
 
-    echo $(jq -r .instance .windows-state.json)
+    jq -r .instance .windows-state.json
 }
