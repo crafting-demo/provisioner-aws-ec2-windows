@@ -4,7 +4,7 @@ ASG_NAME=test-windows-provision
 AVAILABILITY_ZONE=us-east-2a
 MAX_RETRIES=3
 VOLUME_SIZE=10
-EC2_SSH_KEY_FILE=/run/sandbox/fs/secrets/shared/sandbox-temp.pem
+EC2_SSH_KEY_FILE=/run/sandbox/fs/secrets/shared/employ-temp.pem
 
 source ./common.sh
 
