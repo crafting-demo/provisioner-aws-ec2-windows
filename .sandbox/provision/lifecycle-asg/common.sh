@@ -46,5 +46,5 @@ function retrieve_password() {
         sleep 10
     done
 
-    return "$(aws ec2 get-password-data --instance-id $instance_id | jq -r .PasswordData | base64 -d  | openssl pkeyutl  -decrypt -inkey $ec2_ssh_key_file)"
+    echo "$(aws ec2 get-password-data --instance-id $instance_id | jq -r .PasswordData | base64 -d  | openssl pkeyutl  -decrypt -inkey $ec2_ssh_key_file)"
 }
