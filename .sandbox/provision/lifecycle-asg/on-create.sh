@@ -18,17 +18,7 @@ aws ec2 create-tags --resources $INSTANCE_ID --tags Key=Sandbox,Value=$SANDBOX_N
 aws autoscaling detach-instances --instance-ids $INSTANCE_ID --auto-scaling-group-name $ASG_NAME --no-should-decrement-desired-capacity
 
 INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
-PASSWORD_DATA="$(aws ec2 get-password-data --instance-id $INSTANCE_ID)"
-
-retry_count=0
-while [[ $retry_count -lt $MAX_RETRIES ]]; do
-    PASSWORD_DATA="$(aws ec2 get-password-data --instance-id $INSTANCE_ID | jq -r .PasswordData)"
-    [[ -z "$PASSWORD_DATA" ]] || break
-    retry_count=$((retry_count + 1))
-    sleep 10
-done
-
-PASSWORD="$(echo $PASSWORD_DATA  | base64 -d | openssl pkeyutl -decrypt -inkey $EC2_SSH_KEY_FILE)"
+PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"   
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
 PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 
