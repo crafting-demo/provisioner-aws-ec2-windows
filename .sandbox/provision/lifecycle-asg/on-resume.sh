@@ -1,7 +1,7 @@
 #!/bin/bash
 
-: $(ASG_NAME:=test-windows-provision)
-: $(AVAILABILITY_ZONE:=us-east-1a)
+ASG_NAME:=test-windows-provision
+AVAILABILITY_ZONE:=us-east-1a
 
 source ./common.sh
 
