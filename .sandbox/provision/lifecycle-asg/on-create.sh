@@ -1,10 +1,10 @@
 #!/bin/bash
 
-ASG_NAME:=test-windows-provision
-AVAILABILITY_ZONE:=us-east-2a
-MAX_RETRIES:=3
-VOLUME_SIZE:=10
-EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem
+ASG_NAME=$(ASG_NAME:-test-windows-provision)
+AVAILABILITY_ZONE=$(AVAILABILITY_ZONE:-us-east-2a)
+MAX_RETRIES=$(MAX_RETRIES:-3)
+VOLUME_SIZE=$(VOLUME_SIZE:-10)
+EC2_SSH_KEY_FILE=$(EC2_SSH_KEY_FILE:-/run/sandbox/fs/secrets/shared/sandbox-shared.pem)
 
 source ./common.sh
 
