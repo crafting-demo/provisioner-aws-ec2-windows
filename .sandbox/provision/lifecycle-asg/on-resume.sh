@@ -1,8 +1,23 @@
 #!/bin/bash
 
-: ${ASG_NAME:=test-windows-provision}
-: ${AVAILABILITY_ZONE:=us-east-2a}
-: ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/employ-temp.pem}
+# : ${ASG_NAME:=test-windows-provision}
+# : ${AVAILABILITY_ZONE:=us-east-2a}
+# : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
+
+if [[ -z $ASG_NAME ]]; then
+    echo "ASG_NAME must be configured"
+    exit 1
+fi
+
+if [[ -z $AVAILABILITY_ZONE ]]; then
+    echo "AVAILABILITY_ZONE must be configured"
+    exit 1
+fi
+
+if [[ -z $EC2_SSH_KEY_FILE ]]; then
+    echo "EC2_SSH_KEY_FILE must be configured"
+    exit 1
+fi
 
 source ./common.sh
 
