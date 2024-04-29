@@ -9,7 +9,7 @@
 source ./common.sh
 
 # adjust the terminal output settings 
-# redirect_output on-create.log
+redirect_output on-create.log
 
 INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
 INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
@@ -32,7 +32,7 @@ aws ec2 wait volume-available --volume-ids $VOLUME_ID
 aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
 
 # restore the original terminal settings
-# restore_output
+restore_output
 
 cat <<EOF > .windows-state.json
 {

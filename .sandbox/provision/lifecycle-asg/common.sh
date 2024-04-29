@@ -32,7 +32,7 @@ function stored_instance_id() {
 
 # retrieve_password INSTANCE_ID KEY_FILE
 function retrieve_password() {
-    ${MAX_RETRIES:=10}
+    : ${MAX_RETRIES:=10}
     instance_id=$1
     ec2_ssh_key_file=$2
 
