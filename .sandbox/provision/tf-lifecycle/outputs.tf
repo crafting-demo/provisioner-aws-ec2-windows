@@ -7,7 +7,7 @@ output "public_ip" {
 }
 
 output "password" {
-  value = length(aws_instance.vm) > 0 ? rsadecrypt(aws_instance.vm[0].password_data, file(var.keypair_file)) : null
+  value     = length(aws_instance.vm) > 0 ? rsadecrypt(aws_instance.vm[0].password_data, file(var.keypair_file)) : null
   sensitive = true
 }
 

@@ -33,12 +33,12 @@ resource "aws_ebs_volume" "data_volume" {
 resource "aws_instance" "vm" {
   count = var.suspended ? 0 : 1
   launch_template {
-    name = var.launch_template_name
+    name    = var.launch_template_name
     version = var.launch_template_version
   }
   get_password_data = true
   # optional. user_data can be moved to launch template.
-  user_data         = <<-EOT
+  user_data = <<-EOT
     <powershell>
     # Install the OpenSSH Client
     Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
@@ -89,7 +89,7 @@ EOT
 }
 
 resource "aws_volume_attachment" "data_volume_attachment" {
-  count = var.suspended ? 0 : 1
+  count       = var.suspended ? 0 : 1
   device_name = "/dev/xvdf"
   instance_id = aws_instance.vm[0].id
   volume_id   = aws_ebs_volume.data_volume.id

@@ -14,7 +14,7 @@ data "external" "env" {
 provider "aws" {
   default_tags {
     tags = {
-      Sandbox = data.external.env.result.sandbox_name
+      Sandbox   = data.external.env.result.sandbox_name
       SandboxID = data.external.env.result.sandbox_id
     }
   }
@@ -26,11 +26,11 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_instance" "vm" {
   launch_template {
-    name = var.launch_template_name
+    name    = var.launch_template_name
     version = var.launch_template_version
   }
-  get_password_data      = true
-  user_data = <<-EOT
+  get_password_data = true
+  user_data         = <<-EOT
     <powershell>
     # Install the OpenSSH Client
     Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
