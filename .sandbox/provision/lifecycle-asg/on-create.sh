@@ -8,12 +8,12 @@
 
 source ./common.sh
 
-# adjust the terminal output settings 
-redirect_output on-create.log
-
 validate_asg $ASG_NAME
 validate_az $AVAILABILITY_ZONE
 validate_ssh_key $EC2_SSH_KEY_FILE
+
+# adjust the terminal output settings 
+redirect_output on-create.log
 
 INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
 INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"

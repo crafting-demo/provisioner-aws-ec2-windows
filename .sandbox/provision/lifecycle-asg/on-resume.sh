@@ -6,12 +6,13 @@
 
 source ./common.sh
 
-# adjust the terminal output settings 
-redirect_output on-resume.log
-
 validate_asg $ASG_NAME
 validate_az $AVAILABILITY_ZONE
 validate_ssh_key $EC2_SSH_KEY_FILE
+
+# adjust the terminal output settings 
+redirect_output on-resume.log
+
 
 VOLUME_ID="$(stored_volume_id)"
 
