@@ -8,6 +8,7 @@ workspaces:
       - AWS_CONFIG_FILE=/run/sandbox/fs/secrets/shared/AWS-CONFIG
       - AWS_DEFAULT_REGION=us-east-2
       - AVAILABILITY_ZONE=us-east-2a
+      - EC2_SSH_KEY_FILE=/run/sandbox/fs/secrets/shared/sandbox-shared.pem
 overview: |
   # Development with a Windows VM
 resources:
@@ -30,9 +31,13 @@ resources:
       dir: provisioner-aws-ec2-windows/.sandbox/provision/tf-lifecycle
       run:
         timeout: 30m0s
-        env:
-          - "TF_VAR_availablity_zone=us-east-2a"
+        vars:
+          availablity_zone: "$AVAILABILITY_ZONE"
+          keypair_file: "$EC2_SSH_KEY_FILE"
+          ebs_size: "10"
+          ebs_type: "gp3"
+        var:
       save_state: true
       on_suspend:
-        env:
-          - "TF_VAR_suspended=true"
+        vars:
+          suspended: "true"

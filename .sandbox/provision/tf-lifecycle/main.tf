@@ -25,8 +25,8 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_ebs_volume" "data_volume" {
-  size              = 10
-  type              = "gp3"
+  size              = var.ebs_size
+  type              = var.ebs_type
   availability_zone = var.availablity_zone
 }
 
