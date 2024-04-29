@@ -9,7 +9,7 @@
 source ./common.sh
 
 # adjust the terminal output settings 
-redirect_output on-create.log
+# redirect_output on-create.log
 
 INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
 INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
