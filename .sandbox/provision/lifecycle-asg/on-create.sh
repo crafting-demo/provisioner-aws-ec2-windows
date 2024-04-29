@@ -32,7 +32,7 @@ aws ec2 wait volume-available --volume-ids $VOLUME_ID
 aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
 
 # restore the original terminal settings
-restore_output
+# restore_output
 
 cat <<EOF > .windows-state.json
 {
