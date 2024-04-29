@@ -6,25 +6,14 @@
 : ${VOLUME_SIZE:=10}
 : ${MAX_RETRIES:=10}
 
-if [[ -z $ASG_NAME ]]; then
-    echo "ASG_NAME must be configured"
-    exit 1
-fi
-
-if [[ -z $AVAILABILITY_ZONE ]]; then
-    echo "AVAILABILITY_ZONE must be configured"
-    exit 1
-fi
-
-if [[ -z $EC2_SSH_KEY_FILE ]]; then
-    echo "EC2_SSH_KEY_FILE must be configured"
-    exit 1
-fi
-
 source ./common.sh
 
 # adjust the terminal output settings 
 redirect_output on-create.log
+
+validate_asg $ASG_NAME
+validate_az $AVAILABILITY_ZONE
+validate_ssh_key $EC2_SSH_KEY_FILE
 
 INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
 INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"

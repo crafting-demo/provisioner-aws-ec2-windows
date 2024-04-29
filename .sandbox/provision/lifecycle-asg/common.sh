@@ -48,3 +48,37 @@ function retrieve_password() {
 
     echo "$(aws ec2 get-password-data --instance-id $instance_id | jq -r .PasswordData | base64 -d  | openssl pkeyutl  -decrypt -inkey $ec2_ssh_key_file)"
 }
+
+# validate_asg ASG_NAME
+function validate_asg() {
+    auto_scaling_group_name=$1
+
+    result=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $auto_scaling_group_name)
+    [[ $(jq '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || {
+        echo "Invalid auto scaling group: $auto_scaling_group_name"
+        exit 1
+    }
+}
+
+# validate_az AZ
+function validate_az() {
+    availability_zone=$1
+
+    _=$(aws ec2 describe-availability-zones --zone-name $availability_zone)
+
+    [[ $? -eq 0 ]] || {
+        echo "Invalid availablity zone: $availability_zone"
+        exit 1
+    }
+}
+
+# validate_ssh_key PATH
+function validate_ssh_key() {
+    ssh_key_path=$1
+
+    [[ -f $ssh_key_path ]] || {
+        echo "Invalid SSH key path: $ssh_key_path"
+        exit 1
+    }
+}
+

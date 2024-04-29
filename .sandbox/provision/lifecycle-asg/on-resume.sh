@@ -4,25 +4,14 @@
 # : ${AVAILABILITY_ZONE:=us-east-2a}
 # : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
 
-if [[ -z $ASG_NAME ]]; then
-    echo "ASG_NAME must be configured"
-    exit 1
-fi
-
-if [[ -z $AVAILABILITY_ZONE ]]; then
-    echo "AVAILABILITY_ZONE must be configured"
-    exit 1
-fi
-
-if [[ -z $EC2_SSH_KEY_FILE ]]; then
-    echo "EC2_SSH_KEY_FILE must be configured"
-    exit 1
-fi
-
 source ./common.sh
 
 # adjust the terminal output settings 
 redirect_output on-resume.log
+
+validate_asg $ASG_NAME
+validate_az $AVAILABILITY_ZONE
+validate_ssh_key $EC2_SSH_KEY_FILE
 
 VOLUME_ID="$(stored_volume_id)"
 
