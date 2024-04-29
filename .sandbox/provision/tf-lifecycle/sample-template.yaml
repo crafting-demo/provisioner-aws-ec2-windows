@@ -32,8 +32,8 @@ resources:
       run:
         timeout: 30m0s
         vars:
-          availablity_zone: "$AVAILABILITY_ZONE"
           keypair_file: "$EC2_SSH_KEY_FILE"
+          ebs_availablity_zone: "$AVAILABILITY_ZONE"
           ebs_size: "10"
           ebs_type: "gp3"
         var:

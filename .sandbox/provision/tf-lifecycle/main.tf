@@ -27,7 +27,7 @@ data "aws_caller_identity" "current" {}
 resource "aws_ebs_volume" "data_volume" {
   size              = var.ebs_size
   type              = var.ebs_type
-  availability_zone = var.availablity_zone
+  availability_zone = var.ebs_availablity_zone
 }
 
 resource "aws_instance" "vm" {

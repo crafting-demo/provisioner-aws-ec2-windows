@@ -19,7 +19,7 @@ variable "suspended" {
   default     = false
 }
 
-variable "availablity_zone" {
+variable "ebs_availablity_zone" {
   type        = string
   description = "Availability zone for the additional ESB volume"
   default     = "us-east-2a"
