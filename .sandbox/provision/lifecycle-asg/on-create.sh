@@ -1,10 +1,10 @@
 #!/bin/bash
 
-ASG_NAME=test-windows-provision
-AVAILABILITY_ZONE=us-east-2a
-MAX_RETRIES=3
-VOLUME_SIZE=10
-EC2_SSH_KEY_FILE=/run/sandbox/fs/secrets/shared/employ-temp.pem
+: ${ASG_NAME:=test-windows-provision}
+: ${AVAILABILITY_ZONE:=us-east-2a}
+: ${MAX_RETRIES:=3}
+: ${VOLUME_SIZE:=10}
+: ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/employ-temp.pem}
 
 source ./common.sh
 
@@ -32,7 +32,7 @@ PASSWORD="$(echo $PASSWORD_DATA  | base64 -d | openssl pkeyutl -decrypt -inkey $
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
 PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 
-volume_info="${aws ec2 describe-volume --filters Name=tag:SandboxID,Values=$SANDBOX_ID}"
+volume_info="$(aws ec2 describe-volume --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
 VOLUME_ID="$(jq -r '.Volumes[0].VolumeId' <<< $volume_info)"
 if [[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]]; then
     volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
