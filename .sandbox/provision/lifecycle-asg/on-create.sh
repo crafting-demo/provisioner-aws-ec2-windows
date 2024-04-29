@@ -34,10 +34,10 @@ PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 
 volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
 VOLUME_ID="$(jq -r '.Volumes[0].VolumeId' <<< $volume_info)"
-if [[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]]; then
+[[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
     volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
     VOLUME_ID=$(echo $volume | jq -r .VolumeId)
-fi
+}
 aws ec2 wait volume-available --volume-ids $VOLUME_ID
 aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
 
