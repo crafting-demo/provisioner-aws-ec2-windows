@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -e
+
 source ./common.sh
+# redirect stdout to stderr to ensure the stdout output is the desired JSON object.
+redirect_stdout
 
-redirect_output on-delete.log
-
-INSTANCE_ID="$(stored_instance_id)"
-VOLUME_ID="$(stored_volume_id)"
+INSTANCE_ID="$(get_instance_id)"
+VOLUME_ID="$(get_volume_id)"
 
 if [ -n "$INSTANCE_ID" ] ; then
     aws ec2 terminate-instances --instance-ids $INSTANCE_ID
@@ -16,5 +18,5 @@ if [ -n "$VOLUME_ID" ]; then
     aws ec2 delete-volume --volume-id $VOLUME_ID
 fi
 
-restore_output
+restore_stdout
 

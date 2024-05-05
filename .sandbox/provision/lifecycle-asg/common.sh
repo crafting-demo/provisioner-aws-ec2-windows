@@ -1,33 +1,37 @@
 #!/bin/bash
 
-function redirect_output() {
-    local dest="$1"
-    exec 3>&1 4>&2
-    exec &> $dest
-    set -ex
+function redirect_stdout() {
+    exec 3>&1
+    exec 1>&2
 }
 
-function restore_output() {
-    set +x
-    exec >&3 2>&4
-    exec 3>&- 4>&-
+function restore_stdout() {
+    exec 1>&3
+    exec 3>&-
 }
 
-function stored_volume_id() {
-    if [ ! -e ".windows-state.json" ]; then
-        echo "Can not restore the volume ID as the state file does not exist"
-        exit 1
+function get_volume_id() {
+    volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
+    jq -r '.Volumes[0].VolumeId' <<< $volume_info
+}
+
+function get_instance_id() {
+    instances_info=$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values)
+    jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instances_info
+}
+
+# claim_instance_from_asg claims an instance from ASG if there is no existing one claimed.
+function claim_instance_from_asg() {
+    instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
+    if [[ $(jq '.Reservations[0].Instances[0] | length' <<< "$instance_with_sandbox_id") -eq 0 ]]; then 
+        INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
+        INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
+        aws autoscaling detach-instances --instance-ids $INSTANCE_ID --auto-scaling-group-name $ASG_NAME --no-should-decrement-desired-capacity
+        aws ec2 create-tags --resources $INSTANCE_ID --tags Key=Sandbox,Value=$SANDBOX_NAME --tags Key=SandboxID,Value=$SANDBOX_ID
+        echo $INSTANCE_ID
+    else 
+        jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instance_with_sandbox_id
     fi
-    jq -r .volume_id .windows-state.json
-}
-
-function stored_instance_id() {
-    if [ ! -e ".windows-state.json" ]; then
-        echo "Can not restore the instance ID as the state file does not exist"
-        exit 1
-    fi
-
-    jq -r .instance .windows-state.json
 }
 
 # retrieve_password INSTANCE_ID KEY_FILE

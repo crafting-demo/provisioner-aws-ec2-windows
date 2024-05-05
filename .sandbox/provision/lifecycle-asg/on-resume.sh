@@ -4,24 +4,20 @@
 # : ${AVAILABILITY_ZONE:=us-east-2a}
 # : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
 
+set -e
+
 source ./common.sh
+# redirect stdout to stderr to ensure the stdout output is the desired JSON object.
+redirect_stdout
 
 validate_asg $ASG_NAME
 validate_az $AVAILABILITY_ZONE
 validate_ssh_key $EC2_SSH_KEY_FILE
 
-# adjust the terminal output settings 
-redirect_output on-resume.log
-
-
-VOLUME_ID="$(stored_volume_id)"
+VOLUME_ID="$(get_volume_id)"
 
 # TODO: need to lock and prevent race condition
-INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
-INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
-
-aws autoscaling detach-instances --instance-ids $INSTANCE_ID --auto-scaling-group-name $ASG_NAME --no-should-decrement-desired-capacity
-aws ec2 create-tags --resources $INSTANCE_ID --tags Key=Sandbox,Value=$SANDBOX_NAME --tags Key=SandboxID,Value=$SANDBOX_ID
+INSTANCE_ID="$(claim_instance_from_asg)"
 INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
 PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
@@ -30,9 +26,9 @@ PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
 
 # restore the original terminal settings
-restore_output
+restore_stdout
 
-cat <<EOF > .windows-state.json
+cat <<EOF
 {
     "sandbox_id": "$SANDBOX_ID",
     "sandbox_name": "$SANDBOX_NAME",
@@ -43,5 +39,3 @@ cat <<EOF > .windows-state.json
     "instance": "$INSTANCE_ID"
 }
 EOF
-
-cat .windows-state.json

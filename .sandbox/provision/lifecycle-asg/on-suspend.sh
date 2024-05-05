@@ -1,16 +1,18 @@
 #!/bin/bash
 
-source ./common.sh
+set -e
 
-# adjust the terminal output settings 
-redirect_output on-suspend.log
-INSTANCE_ID="$(stored_instance_id)"
-VOLUME_ID="$(stored_volume_id)"
+source ./common.sh
+# redirect stdout to stderr to ensure the stdout output is the desired JSON object.
+redirect_stdout
+
+INSTANCE_ID="$(get_instance_id)"
+VOLUME_ID="$(get_volume_id)"
 aws ec2 terminate-instances --instance-ids $INSTANCE_ID
 
-restore_output
+restore_stdout
 
-cat <<EOF > .windows-state.json
+cat <<EOF
 {
     "sandbox_id": "$SANDBOX_ID",
     "sandbox_name": "$SANDBOX_NAME",
@@ -18,5 +20,3 @@ cat <<EOF > .windows-state.json
     "instance": ""
 }
 EOF
-
-cat .windows-state.json
