@@ -17,6 +17,7 @@ validate_az $AVAILABILITY_ZONE
 validate_ssh_key $EC2_SSH_KEY_FILE
 
 INSTANCE_ID="$(claim_instance_from_asg)"
+echo "$INSTANCE_ID"
 INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
 PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"   
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
