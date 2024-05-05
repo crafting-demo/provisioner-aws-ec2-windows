@@ -28,7 +28,7 @@ function claim_instance_from_asg() {
         INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
         aws autoscaling detach-instances --instance-ids $INSTANCE_ID --auto-scaling-group-name $ASG_NAME --no-should-decrement-desired-capacity
         aws ec2 create-tags --resources $INSTANCE_ID --tags Key=Sandbox,Value=$SANDBOX_NAME --tags Key=SandboxID,Value=$SANDBOX_ID
-        echo $INSTANCE_ID
+        return $INSTANCE_ID
     else 
         jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instance_with_sandbox_id
     fi
