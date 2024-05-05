@@ -6,7 +6,7 @@
 : ${VOLUME_SIZE:=10}
 : ${MAX_RETRIES:=10}
 
-set -e
+set -ex
 
 source ./common.sh
 # redirect stdout to stderr to ensure the stdout output is the desired JSON object.
