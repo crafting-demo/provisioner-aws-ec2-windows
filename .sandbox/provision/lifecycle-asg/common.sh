@@ -22,7 +22,8 @@ function get_instance_id() {
 
 # claim_instance_from_asg claims an instance from ASG if there is no existing one claimed.
 function claim_instance_from_asg() {
-    instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
+    # chceck is there any running instance already
+    instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values=$SANDBOX_ID Name=instance-state-name,Values=running)"
     if [[ $(jq '.Reservations[0].Instances | length' <<< "$instance_with_sandbox_id") -eq 0 ]]; then 
         INSTANCE_IDS="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name $ASG_NAME --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
         INSTANCE_ID="$(echo $INSTANCE_IDS | awk '{print $1}')"
