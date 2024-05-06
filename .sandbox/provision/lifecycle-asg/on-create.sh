@@ -24,7 +24,7 @@ PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDns
 PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 
 volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
-VOLUME_ID=volume_id
+VOLUME_ID=""
 [[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
     volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
     VOLUME_ID=$(echo $volume | jq -r .VolumeId)
