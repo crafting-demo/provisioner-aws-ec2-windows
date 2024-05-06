@@ -24,13 +24,21 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+resource "aws_ebs_volume" "data_volume" {
+  size              = var.ebs_size
+  type              = var.ebs_type
+  availability_zone = var.ebs_availablity_zone
+}
+
 resource "aws_instance" "vm" {
+  count = var.suspended ? 0 : 1
   launch_template {
     name    = var.launch_template_name
     version = var.launch_template_version
   }
   get_password_data = true
-  user_data         = <<-EOT
+  # optional. user_data can be moved to launch template.
+  user_data = <<-EOT
     <powershell>
     # Install the OpenSSH Client
     Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
@@ -57,8 +65,32 @@ resource "aws_instance" "vm" {
     # Ensure the administrators_authorized_keys file complies with the permissions requirement.
     icacls.exe ""C:\ProgramData\ssh\administrators_authorized_keys"" /inheritance:r /grant ""Administrators:F"" /grant ""SYSTEM:F""
 
+    # Generate the init-volume.ps1 file
+    @'
+try {
+  $disk=Get-Disk -Number 1
+  if ($disk.NumberOfPartitions -eq 0) {
+    Write-Host "Initializing the disk"
+    Initialize-Disk -Number 1 -PartitionStyle GPT -ErrorAction Stop
+    New-Partition -AssignDriveLetter -UseMaximumSize -DiskNumber 1 -ErrorAction Stop
+    
+    Format-Volume -FileSystem NTFS -NewFileSystemLabel DevVolume -DriveLetter D -ErrorAction Stop
+  }
+} catch {
+  Write-Host "Error occurred: $_"
+  exit 1
+}
+'@ | Out-File -FilePath C:\init-volume.ps1
+
     # Generate dev certificate
     dotnet dev-certs https -v
     </powershell>
 EOT
+}
+
+resource "aws_volume_attachment" "data_volume_attachment" {
+  count       = var.suspended ? 0 : 1
+  device_name = "/dev/xvdf"
+  instance_id = aws_instance.vm[0].id
+  volume_id   = aws_ebs_volume.data_volume.id
 }
