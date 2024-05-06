@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 source ./common.sh
 # redirect stdout to stderr to ensure the stdout output is the desired JSON object.

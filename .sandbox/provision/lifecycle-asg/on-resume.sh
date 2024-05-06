@@ -4,7 +4,7 @@
 # : ${AVAILABILITY_ZONE:=us-east-2a}
 # : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
 
-set -e
+set -ex
 
 source ./common.sh
 # redirect stdout to stderr to ensure the stdout output is the desired JSON object.
