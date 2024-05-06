@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# : ${ASG_NAME:=test-windows-provision}
-# : ${AVAILABILITY_ZONE:=us-east-2a}
-# : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
 : ${VOLUME_SIZE:=10}
 : ${MAX_RETRIES:=10}
 
@@ -17,17 +14,17 @@ validate_az $AVAILABILITY_ZONE
 validate_ssh_key $EC2_SSH_KEY_FILE
 
 INSTANCE_ID="$(claim_instance_from_asg)"
-INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
+INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]')"
 
 PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"   
-PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
-PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
+PUBLIC_DNS="$(echo $INSTANCE | jq -cMr .NetworkInterfaces[0].Association.PublicDnsName)"
+PUBLIC_IP="$(echo $INSTANCE | jq -cMr .NetworkInterfaces[0].Association.PublicIp)"
 
 volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
 VOLUME_ID=""
 [[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
     volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
-    VOLUME_ID=$(echo $volume | jq -r .VolumeId)
+    VOLUME_ID=$(echo $volume | jq -cMr .VolumeId)
 }
 
 attach_volume_if_needed $VOLUME_ID $INSTANCE_ID

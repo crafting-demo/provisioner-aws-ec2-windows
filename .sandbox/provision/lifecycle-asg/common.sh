@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function fatal() {
+  echo "$@" >&2
+  exit 1
+}
+
 function redirect_stdout() {
     exec 3>&1
     exec 1>&2
@@ -11,12 +16,12 @@ function restore_stdout() {
 }
 
 function get_volume_id() {
-    volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
+    volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
     jq -r '.Volumes[0].VolumeId' <<< $volume_info
 }
 
 function get_instance_id() {
-    instances_info=$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values=$SANDBOX_ID)
+    instances_info="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
     jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instances_info
 }
 
@@ -62,7 +67,7 @@ function retrieve_password() {
         sleep 10
     done
 
-    echo "$(aws ec2 get-password-data --instance-id $instance_id | jq -r .PasswordData | base64 -d  | openssl pkeyutl  -decrypt -inkey $ec2_ssh_key_file)"
+    aws ec2 get-password-data --instance-id $instance_id | jq -r .PasswordData | base64 -d  | openssl pkeyutl  -decrypt -inkey $ec2_ssh_key_file
 }
 
 # validate_asg ASG_NAME
@@ -70,31 +75,19 @@ function validate_asg() {
     auto_scaling_group_name=$1
 
     result=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $auto_scaling_group_name)
-    [[ $(jq '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || {
-        echo "Invalid auto scaling group: $auto_scaling_group_name"
-        exit 1
-    }
+    [[ $(jq '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
 }
 
 # validate_az AZ
 function validate_az() {
     availability_zone=$1
-
-    _=$(aws ec2 describe-availability-zones --zone-name $availability_zone)
-
-    [[ $? -eq 0 ]] || {
-        echo "Invalid availablity zone: $availability_zone"
-        exit 1
-    }
+    aws ec2 describe-availability-zones --zone-name $availability_zone || fatal "Invalid availablity zone: $availability_zone"
 }
 
 # validate_ssh_key PATH
 function validate_ssh_key() {
     ssh_key_path=$1
 
-    [[ -f $ssh_key_path ]] || {
-        echo "Invalid SSH key path: $ssh_key_path"
-        exit 1
-    }
+    [[ -f $ssh_key_path ]] || fatal "Invalid SSH key path: $ssh_key_path"
 }
 
