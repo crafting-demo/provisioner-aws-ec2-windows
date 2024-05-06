@@ -16,7 +16,7 @@ function get_volume_id() {
 }
 
 function get_instance_id() {
-    instances_info=$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values)
+    instances_info=$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values=$SANDBOX_ID)
     jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instances_info
 }
 
@@ -32,6 +32,17 @@ function claim_instance_from_asg() {
     else 
         jq -r '.Reservations[0].Instances[0].InstanceId' <<< $instance_with_sandbox_id
     fi
+}
+
+function attach_volume_if_needed() {
+    VOLUME_ID=$1
+    INSTANCE_ID=$2
+
+    aws ec2 wait volume-available --volume-ids $VOLUME_ID
+    volume="$(aws ec2 describe-volumes --volume-id $VOLUME_ID)"
+    [[ $(jq ".Volumes[0].Attachments | length" <<< "$volume") -gt 0 ]] || {
+        aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
+    }
 }
 
 # retrieve_password INSTANCE_ID KEY_FILE

@@ -18,12 +18,14 @@ VOLUME_ID="$(get_volume_id)"
 
 # TODO: need to lock and prevent race condition
 INSTANCE_ID="$(claim_instance_from_asg)"
+
 INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
+
 PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
 PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
 
-aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
+attach_volume_if_needed $VOLUME_ID $INSTANCE_ID
 
 # restore the original terminal settings
 restore_stdout

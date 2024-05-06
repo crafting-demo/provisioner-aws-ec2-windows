@@ -18,6 +18,7 @@ validate_ssh_key $EC2_SSH_KEY_FILE
 
 INSTANCE_ID="$(claim_instance_from_asg)"
 INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]' | jq '.')"
+
 PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"   
 PUBLIC_DNS="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicDnsName)"
 PUBLIC_IP="$(echo $INSTANCE | jq -r .NetworkInterfaces[0].Association.PublicIp)"
@@ -28,8 +29,8 @@ VOLUME_ID=volume_id
     volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
     VOLUME_ID=$(echo $volume | jq -r .VolumeId)
 }
-aws ec2 wait volume-available --volume-ids $VOLUME_ID
-aws ec2 attach-volume --volume-id $VOLUME_ID --instance-id $INSTANCE_ID --device "/dev/xvdf"
+
+attach_volume_if_needed $VOLUME_ID $INSTANCE_ID
 
 # restore the original terminal settings
 restore_stdout
