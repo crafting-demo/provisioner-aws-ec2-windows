@@ -27,13 +27,25 @@ function get_instance_id() {
 
 # claim_instance_from_asg claims an instance from ASG if there is no existing one claimed.
 function claim_instance_from_asg() {
-    # chceck is there any running instance already
+    # check is there any running instance already
     local instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
     if [[ "$(jq -cMr '.Reservations[0].Instances | length' <<< "$instance_with_sandbox_id")" -eq 0 ]]; then 
         local instance_ids="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$ASG_NAME" --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
         local instance_id="$(echo "$instance_ids" | awk '{print $1}')"
+
+        # detach-instances is an atomic operation and a single instance can not be deatched twice. 
+        # This mechanism is used to prevent race condition between two or more claims that happening at the same time. The second claim would fail.
         aws autoscaling detach-instances --instance-ids "$instance_id" --auto-scaling-group-name "$ASG_NAME" --no-should-decrement-desired-capacity >/dev/null
+
+        # Two tags are created for the detached instance
+        # - Sandbox, this is for referencing purpose and should not be used as an ID during looking up.
+        # - SandboxID, this is the actual identification of the EC2 instance.
+        # An EC2 instance is deemed as leaked if:
+        # - SandboxID tag is missing
+        # - Some ASG flagging tag exists, e.g. sandbox-asg=true
+        # - The instance is detached from ASG.
         aws ec2 create-tags --resources "$instance_id" --tags Key=Sandbox,Value="$SANDBOX_NAME" --tags Key=SandboxID,Value="$SANDBOX_ID"
+
         echo "$instance_id"
     else 
         jq -cMr '.Reservations[0].Instances[0].InstanceId' <<< "$instance_with_sandbox_id"
@@ -45,7 +57,7 @@ function attach_volume_if_needed() {
     local instance_id=$2
 
     aws ec2 wait volume-available --volume-ids "$volume_id"
-    volume="$(aws ec2 describe-volumes --volume-id "$volume_id")"
+    local volume="$(aws ec2 describe-volumes --volume-id "$volume_id")"
     [[ "$(jq -cMr ".Volumes[0].Attachments | length" <<< "$volume")" -gt 0 ]] || {
         aws ec2 attach-volume --volume-id "$volume_id" --instance-id "$instance_id" --device "/dev/xvdf"
     }
@@ -59,7 +71,7 @@ function retrieve_password() {
 
     local password_data="$(aws ec2 get-password-data --instance-id "$instance_id")"
 
-    retry_count=0
+    local retry_count=0
     while [[ "$retry_count" -lt "$MAX_RETRIES" ]]; do
         password_data="$(aws ec2 get-password-data --instance-id "$instance_id" | jq -cMr .PasswordData)"
         [[ -z "$password_data" ]] || break
