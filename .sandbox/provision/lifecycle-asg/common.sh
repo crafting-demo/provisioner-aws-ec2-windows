@@ -75,7 +75,7 @@ function validate_asg() {
     local auto_scaling_group_name=$1
 
     local result="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name")"
-    [[ $(jq -cMr'.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
+    [[ $(jq -cMr '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
 }
 
 # validate_az AZ
