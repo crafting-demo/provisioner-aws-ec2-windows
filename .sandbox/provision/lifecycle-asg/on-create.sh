@@ -9,25 +9,25 @@ source ./common.sh
 # redirect stdout to stderr to ensure the stdout output is the desired JSON object.
 redirect_stdout
 
-validate_asg $ASG_NAME
-validate_az $AVAILABILITY_ZONE
-validate_ssh_key $EC2_SSH_KEY_FILE
+validate_asg "$ASG_NAME"
+validate_az "$AVAILABILITY_ZONE"
+validate_ssh_key "$EC2_SSH_KEY_FILE"
 
 INSTANCE_ID="$(claim_instance_from_asg)"
-INSTANCE="$(aws ec2 describe-instances --instance-id $INSTANCE_ID --query 'Reservations[0].Instances[0]')"
+INSTANCE="$(aws ec2 describe-instances --instance-id "$INSTANCE_ID" --query 'Reservations[0].Instances[0]')"
 
-PASSWORD="$(retrieve_password $INSTANCE_ID $EC2_SSH_KEY_FILE)"   
-PUBLIC_DNS="$(echo $INSTANCE | jq -cMr .NetworkInterfaces[0].Association.PublicDnsName)"
-PUBLIC_IP="$(echo $INSTANCE | jq -cMr .NetworkInterfaces[0].Association.PublicIp)"
+PASSWORD="$(retrieve_password "$INSTANCE_ID" "$EC2_SSH_KEY_FILE")"
+PUBLIC_DNS="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicDnsName)"
+PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicIp)"
 
-volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values=$SANDBOX_ID)"
+volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
 VOLUME_ID=""
 [[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
-    volume="$(aws ec2 create-volume --size $VOLUME_SIZE --availability-zone $AVAILABILITY_ZONE --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value=$SANDBOX_ID}]")"
-    VOLUME_ID=$(echo $volume | jq -cMr .VolumeId)
+    volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value="$SANDBOX_ID"}]")"
+    VOLUME_ID=$(echo "$volume" | jq -cMr .VolumeId)
 }
 
-attach_volume_if_needed $VOLUME_ID $INSTANCE_ID
+attach_volume_if_needed "$VOLUME_ID" "$INSTANCE_ID"
 
 # restore the original terminal settings
 restore_stdout

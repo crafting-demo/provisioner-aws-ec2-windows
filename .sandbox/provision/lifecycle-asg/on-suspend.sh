@@ -8,7 +8,7 @@ redirect_stdout
 
 INSTANCE_ID="$(get_instance_id)"
 VOLUME_ID="$(get_volume_id)"
-aws ec2 terminate-instances --instance-ids $INSTANCE_ID
+aws ec2 terminate-instances --instance-ids "$INSTANCE_ID"
 
 restore_stdout
 
