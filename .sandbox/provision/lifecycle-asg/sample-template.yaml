@@ -4,6 +4,14 @@ workspaces:
       - path: provisioner-aws-ec2-windows
         repo:
           git: https://github.com/crafting-demo/provisioner-aws-ec2-windows.git
+        manifest:
+          overlays:
+            - content: |-
+                jobs:
+                  cleanup:
+                    run:
+                      cmd: ".sandbox/provision/lifecycle-asg/cleanup.sh"
+                    schedule: "*/10 * * * *"
     env:
       - AWS_CONFIG_FILE=/run/sandbox/fs/secrets/shared/AWS-CONFIG
       - AWS_DEFAULT_REGION=us-east-2

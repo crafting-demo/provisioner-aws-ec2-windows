@@ -6,5 +6,5 @@ INSTANCE_IDS="$(aws ec2 describe-instances --filters "Name=instance-state-name,V
 
 while IFS= read -r instance_id; do
     echo "Processing instance ID: $instance_id"
-    aws ec2 terminate-instance --instance-ids "$instance_id"
+    aws ec2 terminate-instances --instance-ids "$instance_id"
 done < <(echo "$INSTANCE_IDS" | jq -r '.[]')
