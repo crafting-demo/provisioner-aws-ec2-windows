@@ -20,3 +20,5 @@ fi
 
 restore_stdout
 
+./cleanup.sh
+
