@@ -21,7 +21,7 @@ function get_volume_id() {
 }
 
 function get_instance_id() {
-    local instances_info="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
+    local instances_info="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
     jq -cMr '.Reservations[0].Instances[0].InstanceId' <<< "$instances_info"
 }
 
