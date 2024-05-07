@@ -22,7 +22,7 @@ PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.Public
 
 volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
 VOLUME_ID=""
-[[ $(jq '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
+[[ $(jq -cMr '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
     volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value="$SANDBOX_ID"}]")"
     VOLUME_ID=$(echo "$volume" | jq -cMr .VolumeId)
 }

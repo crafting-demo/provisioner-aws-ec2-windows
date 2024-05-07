@@ -29,7 +29,7 @@ function get_instance_id() {
 function claim_instance_from_asg() {
     # chceck is there any running instance already
     local instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:SandboxID,Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
-    if [[ "$(jq '.Reservations[0].Instances | length' <<< "$instance_with_sandbox_id")" -eq 0 ]]; then 
+    if [[ "$(jq -cMr '.Reservations[0].Instances | length' <<< "$instance_with_sandbox_id")" -eq 0 ]]; then 
         local instance_ids="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$ASG_NAME" --no-paginate --query "AutoScalingGroups[].Instances[].InstanceId" --output text)"
         local instance_id="$(echo "$instance_ids" | awk '{print $1}')"
         aws autoscaling detach-instances --instance-ids "$instance_id" --auto-scaling-group-name "$ASG_NAME" --no-should-decrement-desired-capacity >/dev/null
@@ -46,7 +46,7 @@ function attach_volume_if_needed() {
 
     aws ec2 wait volume-available --volume-ids "$volume_id"
     volume="$(aws ec2 describe-volumes --volume-id "$volume_id")"
-    [[ "$(jq ".Volumes[0].Attachments | length" <<< "$volume")" -gt 0 ]] || {
+    [[ "$(jq -cMr ".Volumes[0].Attachments | length" <<< "$volume")" -gt 0 ]] || {
         aws ec2 attach-volume --volume-id "$volume_id" --instance-id "$instance_id" --device "/dev/xvdf"
     }
 }
