@@ -47,7 +47,6 @@ resources:
       on_delete:
         max_retries: 3
         timeout: 30m0s
-        save_state: true
         use_workspace:
           name: provisioner
           run:
@@ -56,7 +55,6 @@ resources:
       on_suspend:
         max_retries: 3
         timeout: 30m0s
-        save_state: true
         use_workspace:
           name: provisioner
           run:

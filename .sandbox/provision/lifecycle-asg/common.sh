@@ -1,5 +1,7 @@
 #!/bin/bash
 
+: ${MAX_RETRIES:=10}
+
 function fatal() {
   echo "$@" >&2
   exit 1
@@ -53,8 +55,8 @@ function claim_instance_from_asg() {
 }
 
 function attach_volume_if_needed() {
-    local volume_id=$1
-    local instance_id=$2
+    local volume_id="$1"
+    local instance_id="$2"
 
     aws ec2 wait volume-available --volume-ids "$volume_id"
     local volume="$(aws ec2 describe-volumes --volume-id "$volume_id")"
@@ -65,9 +67,8 @@ function attach_volume_if_needed() {
 
 # retrieve_password INSTANCE_ID KEY_FILE
 function retrieve_password() {
-    : ${MAX_RETRIES:=10}
-    local instance_id=$1
-    local ec2_ssh_key_file=$2
+    local instance_id="$1"
+    local ec2_ssh_key_file="$2"
 
     local password_data="$(aws ec2 get-password-data --instance-id "$instance_id")"
 
@@ -84,7 +85,7 @@ function retrieve_password() {
 
 # validate_asg ASG_NAME
 function validate_asg() {
-    local auto_scaling_group_name=$1
+    local auto_scaling_group_name="$1"
 
     local result="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name")"
     [[ $(jq -cMr '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
@@ -92,13 +93,13 @@ function validate_asg() {
 
 # validate_az AZ
 function validate_az() {
-    local availability_zone=$1
+    local availability_zone="$1"
     aws ec2 describe-availability-zones --zone-name "$availability_zone" || fatal "Invalid availablity zone: $availability_zone"
 }
 
 # validate_ssh_key PATH
 function validate_ssh_key() {
-    local ssh_key_path=$1
+    local ssh_key_path="$1"
 
     [[ -f $ssh_key_path ]] || fatal "Invalid SSH key path: $ssh_key_path"
 }
