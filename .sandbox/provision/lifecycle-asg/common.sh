@@ -8,16 +8,6 @@ function fatal() {
   exit 1
 }
 
-function redirect_stdout() {
-    exec 3>&1
-    exec 1>&2
-}
-
-function restore_stdout() {
-    exec 1>&3
-    exec 3>&-
-}
-
 function get_volume_id() {
     aws ec2 describe-volumes --filters Name=tag:SandboxID,Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text
 }
