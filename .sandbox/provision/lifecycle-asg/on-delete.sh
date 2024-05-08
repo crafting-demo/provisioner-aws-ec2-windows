@@ -3,8 +3,6 @@
 set -ex
 
 source ./common.sh
-# redirect stdout to stderr to ensure the stdout output is the desired JSON object.
-redirect_stdout
 
 INSTANCE_ID="$(get_instance_id)"
 VOLUME_ID="$(get_volume_id)"
@@ -17,8 +15,6 @@ fi
 if [ -n "$VOLUME_ID" ]; then
     aws ec2 delete-volume --volume-id "$VOLUME_ID"
 fi
-
-restore_stdout
 
 ./cleanup.sh
 
