@@ -19,10 +19,10 @@ function on_create() {
     PUBLIC_DNS="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicDnsName)"
     PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicIp)"
 
-    volume_info="$(aws ec2 describe-volumes --filters Name=tag:SandboxID,Values="$SANDBOX_ID")"
+    volume_info="$(aws ec2 describe-volumes --filters Name=tag:$SANDBOX_ID_TAG,Values="$SANDBOX_ID")"
     VOLUME_ID=""
     [[ $(jq -cMr '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
-        volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=SandboxID,Value="$SANDBOX_ID"}]")"
+        volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
         VOLUME_ID=$(echo "$volume" | jq -cMr .VolumeId)
     }
 
