@@ -8,7 +8,7 @@ set -ex
 source ./common.sh
 
 function on_create() {
-    alidate_asg "$ASG_NAME"
+    validate_asg "$ASG_NAME"
     validate_az "$AVAILABILITY_ZONE"
     validate_ssh_key "$EC2_SSH_KEY_FILE"
 
