@@ -17,7 +17,7 @@ Please refer to `sample-template.yaml`.
 
 The below variables can be injected to the sandbox template to override the default values. 
 
-- `DEVICE_NAME`: The additional EBS volume will be mounted to the EC2 instance as a device, of which the name is specified. The default value is `xvdf`, as suggested by https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/device_naming.html.
+- `DEVICE_NAME`: The additional EBS volume will be mounted to the EC2 instance as a device, of which the name is specified by this variable. The default value is `/dev/xvdf`, as suggested by https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/device_naming.html.
 - `ASG_NAME`: The name of the ASG, from which the EC2 instance is claimed and detached.
 - `SANDBOX_NAME_TAG`: This is part of the ASG configuration, all instances in the ASG or claimed from the ASG will have this tag. The default value is `sandbox-asg`.
 - `SANDBOX_ID_TAG`: All claimed EC2 instances will be tagged with the ID of the current Sandbox. The tag name is specified by `SANDBOX_ID_TAG`. The default value `SandboxManaged-SandboxID`.
