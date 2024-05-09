@@ -16,10 +16,11 @@ function on_create() {
     INSTANCE="$(aws ec2 describe-instances --instance-id "$INSTANCE_ID" --query 'Reservations[0].Instances[0]')"
 
     PASSWORD="$(retrieve_password "$INSTANCE_ID" "$EC2_SSH_KEY_FILE")"
-    PUBLIC_DNS="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicDnsName)"
-    PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr .NetworkInterfaces[0].Association.PublicIp)"
+    PUBLIC_DNS="$(echo "$INSTANCE" | jq -cMr '.NetworkInterfaces[0].Association.PublicDnsName')"
+    PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr '.NetworkInterfaces[0].Association.PublicIp')"
 
-    volume_info="$(aws ec2 describe-volumes --filters Name=tag:$SANDBOX_ID_TAG,Values="$SANDBOX_ID")"
+    local volume_info volume
+    volume_info="$(aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID")"
     VOLUME_ID=""
     [[ $(jq -cMr '.Volumes | length' <<< "$volume_info") -gt 0 ]] || {
         volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"

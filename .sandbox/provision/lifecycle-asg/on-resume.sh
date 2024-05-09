@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# : ${ASG_NAME:=test-windows-provision}
-# : ${AVAILABILITY_ZONE:=us-east-2a}
-# : ${EC2_SSH_KEY_FILE:=/run/sandbox/fs/secrets/shared/sandbox-shared.pem}
-
 set -ex
 
 source ./common.sh
