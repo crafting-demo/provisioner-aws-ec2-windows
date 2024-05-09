@@ -4,6 +4,7 @@
 : ${DEVICE_NAME:="/dev/xvdf"}
 : ${SANDBOX_NAME_TAG:="SandboxManaged-SandboxName"}
 : ${SANDBOX_ID_TAG:="SandboxManaged-SandboxID"}
+: ${SANDBOX_ASG_TAG:="sandbox-asg"}
 
 function fatal() {
   echo "$@" >&2
@@ -21,7 +22,8 @@ function get_instance_id() {
 # claim_instance_from_asg claims an instance from ASG if there is no existing one claimed.
 function claim_instance_from_asg() {
     # check is there any running instance already
-    local instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:$SANDBOX_ID_TAG,Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
+    local instance_with_sandbox_id=""
+    instance_with_sandbox_id="$(aws ec2 describe-instances --filters Name=tag:$SANDBOX_ID_TAG,Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
     if [[ "$(jq -cMr '.Reservations[0].Instances | length' <<< "$instance_with_sandbox_id")" -eq 0 ]]; then 
         local instance_id=""
         instance_id="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "$ASG_NAME" --no-paginate --query AutoScalingGroups[0].Instances[0].InstanceId --output text)"
