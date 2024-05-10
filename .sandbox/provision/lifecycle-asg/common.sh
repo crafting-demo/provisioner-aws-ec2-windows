@@ -11,6 +11,11 @@ function fatal() {
   exit 1
 }
 
+
+function get_volume_id() {
+    aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text
+}
+
 function create_volume_if_needed() {
     local volume_id=$(get_volume_id)
     if [[ -z "$volume_id" ]]; then
@@ -18,10 +23,6 @@ function create_volume_if_needed() {
         volume_id="${echo "$volume" | jq -cMr .VolumeId}"
     fi
     echo "$volume_id"
-}
-
-function get_volume_id() {
-    aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text
 }
 
 function get_instance_id() {

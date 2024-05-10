@@ -44,10 +44,7 @@ function delete() {
 set -ex
 cmd="$1"
 case "$cmd" in 
-    create)
-        provision >&2
-        ;;
-    resume)
+    create|resume)
         provision >&2
         ;;
     suspend)
