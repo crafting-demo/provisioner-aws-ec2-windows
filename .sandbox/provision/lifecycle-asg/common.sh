@@ -1,6 +1,6 @@
 #!/bin/bash
 
-: ${MAX_RETRIES:=10}
+: ${MAX_RETRIES:=30}
 : ${VOLUME_SIZE:=10}
 : ${DEVICE_NAME:="/dev/xvdf"}
 : ${SANDBOX_NAME_TAG:="SandboxManaged-SandboxName"}
@@ -125,4 +125,10 @@ function validate_ssh_key() {
     local ssh_key_path="$1"
 
     [[ -f "$ssh_key_path" ]] || fatal "Invalid SSH key path: $ssh_key_path"
+}
+
+function cleanup() {
+    local instance_ids
+    instance_ids="$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:$SANDBOX_ASG_TAG,Values=true" --query "Reservations[].Instances[?!(Tags[?Key=='aws:autoscaling:groupName'] || Tags[?Key==$SANBODX_ID_TAG])].InstanceId[]" | jq -cMr '.[]')" 
+    [[ -z $instance_ids ]] || aws ec2 terminate-instances --instance-ids "${instance_ids[@]}"
 }

@@ -25,6 +25,7 @@ function suspend() {
 function delete() {
     terminate_instance
     delete_volume
+    cleanup
 }
 
 set -ex
@@ -38,7 +39,6 @@ case "$cmd" in
         ;;
     delete)
         delete >&2
-        ./cleanup.sh
         ;;
     *) fatal "Unknown command"
 esac
