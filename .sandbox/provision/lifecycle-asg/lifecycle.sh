@@ -14,7 +14,7 @@ function provision() {
     PUBLIC_DNS="$(echo "$INSTANCE" | jq -cMr '.NetworkInterfaces[0].Association.PublicDnsName')"
     PUBLIC_IP="$(echo "$INSTANCE" | jq -cMr '.NetworkInterfaces[0].Association.PublicIp')"
 
-    VOLUME_ID="${create_volume_if_needed}"
+    VOLUME_ID="$(create_volume_if_needed)"
     attach_volume_if_needed "$VOLUME_ID" "$INSTANCE_ID"
 }
 
