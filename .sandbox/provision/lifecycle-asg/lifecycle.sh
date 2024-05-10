@@ -41,7 +41,8 @@ function delete() {
     fi
 }
 
-local cmd="$1"
+set -ex
+cmd="$1"
 case "$cmd" in 
     create)
         provision >&2
