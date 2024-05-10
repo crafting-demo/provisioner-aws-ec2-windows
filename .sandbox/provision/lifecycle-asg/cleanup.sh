@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 source ./common.sh
 
 # cleanup leaked instances
