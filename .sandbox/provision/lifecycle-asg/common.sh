@@ -13,10 +13,10 @@ function fatal() {
 
 function create_volume_if_needed() {
     local volume_id=$(get_volume_id)
-    [[ -z "$volume_id" ]] || {
+    if [[ -z "$volume_id" ]]; then
         volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
         volume_id="${echo "$volume" | jq -cMr .VolumeId}"
-    }
+    fi
     echo "$volume_id"
 }
 
