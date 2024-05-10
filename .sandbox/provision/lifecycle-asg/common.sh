@@ -22,7 +22,7 @@ function create_volume_if_needed() {
     local volume_id="$(get_volume_id)"
     if [[ "$volume_id" -eq null ]]; then
         volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
-        volume_id="${echo "$volume" | jq -cMr .VolumeId}"
+        volume_id="${echo "$volume" | jq -cMr '.Volumes[0].VolumeId'}"
     fi
     echo "$volume_id"
 }
