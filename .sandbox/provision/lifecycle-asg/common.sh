@@ -12,20 +12,37 @@ function fatal() {
 }
 
 function get_volume_id() {
-    aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text
+    local volume
+    volume="$(aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID")"
+    jq -cMr '.Volumes[0].VolumeId' <<< "$volume"
 }
 
 function create_volume_if_needed() {
     local volume_id="$(get_volume_id)"
-    if [[ -z "$volume_id" ]]; then
+    if [[ "$volume_id" -eq null ]]; then
         volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
         volume_id="${echo "$volume" | jq -cMr .VolumeId}"
     fi
     echo "$volume_id"
 }
 
+function delete_volume() {
+    local volume_id="$(get_volume_id)"
+    [[ "$volume_id" = "null" ]] || aws ec2 delete-volume --volume-id "$volume_id"
+}
+
 function get_instance_id() {
-    aws ec2 describe-instances --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" Name=instance-state-name,Values=running --query 'Reservations[0].Instances[0].InstanceId' --output text
+    instance="$(aws ec2 describe-instances --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
+    jq -cMr '.Reservations[0].Instances[0].InstanceId' <<< "$instance"
+}
+
+function terminate_instance() {
+    local instance_id
+    instance_id="$(get_instance_id)"
+    [[ "$instance_id" = "null" ]] || {
+        aws ec2 terminate-instances --instance-ids "$instance_id"
+        aws ec2 wait instance-terminated --instance-ids "$instance_id"
+    }
 }
 
 # claim_instance_from_asg claims an instance from ASG if there is no existing one claimed.
