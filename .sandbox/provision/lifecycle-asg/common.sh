@@ -11,6 +11,15 @@ function fatal() {
   exit 1
 }
 
+function create_volume_if_needed() {
+    local volume_id=$(get_volume_id)
+    [[ -z "$volume_id" ]] || {
+        volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
+        volume_id="${echo "$volume" | jq -cMr .VolumeId}"
+    }
+    echo "$volume_id"
+}
+
 function get_volume_id() {
     aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text
 }

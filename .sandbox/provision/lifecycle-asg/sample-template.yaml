@@ -42,7 +42,7 @@ resources:
         use_workspace:
           name: provisioner
           run:
-            cmd: ./on-create.sh
+            cmd: ./lifecycle.sh create
             dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
       on_delete:
         max_retries: 3
@@ -50,7 +50,7 @@ resources:
         use_workspace:
           name: provisioner
           run:
-            cmd: ./on-delete.sh
+            cmd: ./lifecycle.sh delete
             dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
       on_suspend:
         max_retries: 3
@@ -58,7 +58,7 @@ resources:
         use_workspace:
           name: provisioner
           run:
-            cmd: ./on-suspend.sh
+            cmd: ./lifecycle.sh suspend
             dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
       on_resume:
         timeout: 30m0s
@@ -66,5 +66,5 @@ resources:
         use_workspace:
           name: provisioner
           run:
-            cmd: ./on-resume.sh
+            cmd: ./lifecycle.sh resume
             dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
