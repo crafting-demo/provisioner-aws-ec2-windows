@@ -129,6 +129,6 @@ function validate_ssh_key() {
 
 function cleanup() {
     local instance_ids
-    instance_ids="$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:$SANDBOX_ASG_TAG,Values=true" --query "Reservations[].Instances[?!(Tags[?Key=='aws:autoscaling:groupName'] || Tags[?Key==$SANDBOX_ID_TAG])].InstanceId[]" | jq -cMr '.[]')" 
+    instance_ids="$(aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" "Name=tag:$SANDBOX_ASG_TAG,Values=true" --query "Reservations[].Instances[?!(Tags[?Key=='aws:autoscaling:groupName'] || Tags[?Key=='$SANDBOX_ID_TAG'])].InstanceId[]" | jq -cMr '.[]')" 
     [[ -z $instance_ids ]] || aws ec2 terminate-instances --instance-ids "${instance_ids[@]}"
 }
