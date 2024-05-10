@@ -1,6 +1,7 @@
 #!/bin/bash
 
 : ${MAX_RETRIES:=10}
+: ${VOLUME_SIZE:=10}
 : ${DEVICE_NAME:="/dev/xvdf"}
 : ${SANDBOX_NAME_TAG:="SandboxManaged-SandboxName"}
 : ${SANDBOX_ID_TAG:="SandboxManaged-SandboxID"}
