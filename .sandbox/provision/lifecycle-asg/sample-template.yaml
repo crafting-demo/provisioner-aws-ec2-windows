@@ -11,7 +11,6 @@ workspaces:
                   cleanup:
                     run:
                       cmd: ".sandbox/provision/lifecycle-asg/cleanup.sh"
-                      dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
                     schedule: "*/10 * * * *"
     env:
       - AWS_CONFIG_FILE=/run/sandbox/fs/secrets/shared/AWS-CONFIG

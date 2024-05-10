@@ -2,7 +2,7 @@
 
 set -ex
 
-source ./common.sh
+source .sandbox/provision/lifecycle-asg/common.sh
 
 # cleanup leaked instances
 echo "Checking and cleaning up the leaked instances (if any)"
