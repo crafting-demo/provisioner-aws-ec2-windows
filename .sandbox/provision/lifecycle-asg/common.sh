@@ -17,10 +17,10 @@ function process_response() {
     if (( $# == 0 )) ; then
         response="$(< /dev/stdin)"
     else
-        response="$1"
+        response="$@"
     fi
 
-    if [[ "$response" = "None" ]]; then
+    if [[ "$response" == "None" ]]; then
         response=""
     fi
     echo "$response"
@@ -52,7 +52,7 @@ function terminate_instance() {
     instance_id="$(get_instance_id)"
     [[ -z "$instance_id" ]] || {
         aws ec2 terminate-instances --instance-ids "$instance_id"
-        aws ec2 wait instance-terminated --instance-ids "$instance_id"
+        aws ec2 wait instance-terminated --instance-ids "$instance_id" || true
     }
 }
 
@@ -88,8 +88,8 @@ function attach_volume_if_needed() {
     local volume_id="$1"
     local instance_id="$2"
 
-    aws ec2 wait volume-available --volume-ids "$volume_id"
-    [[ $(aws ec2 describe-volumes --volume-id "$volume_id" --query "Volumes[0].Attachments" | jq 'length') -gt 0 ]] || {
+    aws ec2 wait volume-available --volume-ids "$volume_id" || true
+    [[ "$(aws ec2 describe-volumes --volume-id "$volume_id" --query "Volumes[0].Attachments" | jq 'length')" -gt 0 ]] || {
         aws ec2 attach-volume --volume-id "$volume_id" --instance-id "$instance_id" --device "$DEVICE_NAME"
     }
 }
@@ -100,8 +100,6 @@ function retrieve_password() {
     local ec2_ssh_key_file="$2"
     local password_data
 
-    password_data="$(aws ec2 get-password-data --instance-id "$instance_id" --query 'PasswordData' --output text)"
-
     local retry_count=0
     while [[ "$retry_count" -lt "$MAX_RETRIES" ]]; do
         password_data="$(aws ec2 get-password-data --instance-id "$instance_id" --query 'PasswordData' --output text)"
@@ -110,15 +108,14 @@ function retrieve_password() {
         sleep 10
     done
 
-    [[ -n "$password_data" ]] || fatal "Unable to get password data"
-    
+    [[ -n "$password_data" ]] || fatal "Unable to get password dat"
     echo "$password_data" | base64 -d  | openssl pkeyutl  -decrypt -inkey "$ec2_ssh_key_file"
 }
 
 # validate_asg ASG_NAME
 function validate_asg() {
     local auto_scaling_group_name="$1"
-    [[ $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name" --query 'AutoScalingGroups' | jq 'length') -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
+    [[ "$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name" --query 'AutoScalingGroups' | jq 'length')" -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
 }
 
 # validate_az AZ
