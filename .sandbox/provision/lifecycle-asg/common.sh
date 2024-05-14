@@ -13,7 +13,15 @@ function fatal() {
 }
 
 function process_response() {
-    local response="$1"
+    local response
+    if (( $# == 0 )) ; then
+        response < /dev/stdin
+        echo
+    else
+        response <<< "$1"
+        echo
+    fi
+
     if [[ "$response" = "None" ]]; then
         response=""
     fi
