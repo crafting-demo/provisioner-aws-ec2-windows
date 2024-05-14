@@ -8,39 +8,43 @@
 : ${SANDBOX_ASG_TAG:="sandbox-asg"}
 
 function fatal() {
-  echo "$@" >&2
-  exit 1
+    echo "$@" >&2
+    exit 1
+}
+
+function process_response() {
+    local response="$1"
+    if [[ "$response" = "None" ]]; then
+        response=""
+    fi
+    echo "$response"
 }
 
 function get_volume_id() {
-    local volume
-    volume="$(aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID")"
-    jq -cMr '.Volumes[0].VolumeId' <<< "$volume"
+    aws ec2 describe-volumes --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" --query 'Volumes[0].VolumeId' --output text | process_response
 }
 
 function create_volume_if_needed() {
     local volume_id="$(get_volume_id)"
-    if [[ "$volume_id" -eq null ]]; then
-        volume="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]")"
-        volume_id="$(echo "$volume" | jq -cMr '.VolumeId')"
+    if [[ -z "$volume_id" ]]; then
+        volume_id="$(aws ec2 create-volume --size "$VOLUME_SIZE" --availability-zone "$AVAILABILITY_ZONE" --tag-specification "ResourceType=volume,Tags=[{Key=$SANDBOX_ID_TAG,Value="$SANDBOX_ID"}]" --query "VolumeId" --output text | process_response)"
     fi
     echo "$volume_id"
 }
 
 function delete_volume() {
     local volume_id="$(get_volume_id)"
-    [[ "$volume_id" = "null" ]] || aws ec2 delete-volume --volume-id "$volume_id"
+    [[ -z "$volume_id" ]] || aws ec2 delete-volume --volume-id "$volume_id"
 }
 
 function get_instance_id() {
-    instance="$(aws ec2 describe-instances --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" Name=instance-state-name,Values=running)"
-    jq -cMr '.Reservations[0].Instances[0].InstanceId' <<< "$instance"
+    aws ec2 describe-instances --filters Name=tag:"$SANDBOX_ID_TAG",Values="$SANDBOX_ID" Name=instance-state-name,Values=running --query 'Reservations[0].Instances[0].InstanceId' --output text | process_response
 }
 
 function terminate_instance() {
     local instance_id
     instance_id="$(get_instance_id)"
-    [[ "$instance_id" = "null" ]] || {
+    [[ -z "$instance_id" ]] || {
         aws ec2 terminate-instances --instance-ids "$instance_id"
         aws ec2 wait instance-terminated --instance-ids "$instance_id"
     }
@@ -77,11 +81,9 @@ function claim_instance_from_asg() {
 function attach_volume_if_needed() {
     local volume_id="$1"
     local instance_id="$2"
-    local volume
 
     aws ec2 wait volume-available --volume-ids "$volume_id"
-    volume="$(aws ec2 describe-volumes --volume-id "$volume_id")"
-    [[ "$(jq -cMr ".Volumes[0].Attachments | length" <<< "$volume")" -gt 0 ]] || {
+    [[ $(aws ec2 describe-volumes --volume-id "$volume_id" --query "Volumes[0].Attachments" | jq 'length') -gt 0 ]] || {
         aws ec2 attach-volume --volume-id "$volume_id" --instance-id "$instance_id" --device "$DEVICE_NAME"
     }
 }
@@ -102,16 +104,15 @@ function retrieve_password() {
         sleep 10
     done
 
+    [[ -n "$password_data" ]] || fatal "Unable to get password data"
+    
     echo "$password_data" | base64 -d  | openssl pkeyutl  -decrypt -inkey "$ec2_ssh_key_file"
 }
 
 # validate_asg ASG_NAME
 function validate_asg() {
     local auto_scaling_group_name="$1"
-    local result
-
-    result="$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name")"
-    [[ $(jq -cMr '.AutoScalingGroups | length' <<< "$result") -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
+    [[ $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names "$auto_scaling_group_name" --query 'AutoScalingGroups' | jq 'length') -gt 0 ]] || fatal "Invalid auto scaling group: $auto_scaling_group_name"
 }
 
 # validate_az AZ

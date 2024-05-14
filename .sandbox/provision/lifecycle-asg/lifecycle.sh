@@ -23,7 +23,7 @@ function suspend() {
 }
 
 function delete() {
-    terminate_instance
+    terminate_instance || true
     delete_volume
     cleanup
 }
