@@ -16,10 +16,8 @@ function process_response() {
     local response
     if (( $# == 0 )) ; then
         response="$(< /dev/stdin)"
-        echo
     else
         response <<< "$1"
-        echo
     fi
 
     if [[ "$response" = "None" ]]; then
