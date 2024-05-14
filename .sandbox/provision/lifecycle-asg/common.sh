@@ -15,7 +15,7 @@ function fatal() {
 function process_response() {
     local response
     if (( $# == 0 )) ; then
-        response < /dev/stdin
+        response="$(< /dev/stdin)"
         echo
     else
         response <<< "$1"
