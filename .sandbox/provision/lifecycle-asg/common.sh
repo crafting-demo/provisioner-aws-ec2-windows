@@ -17,7 +17,7 @@ function process_response() {
     if (( $# == 0 )) ; then
         response="$(< /dev/stdin)"
     else
-        response <<< "$1"
+        response="$1"
     fi
 
     if [[ "$response" = "None" ]]; then
