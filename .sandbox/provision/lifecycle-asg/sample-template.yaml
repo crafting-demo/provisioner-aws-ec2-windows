@@ -1,0 +1,70 @@
+workspaces:
+  - name: provisioner
+    checkouts:
+      - path: provisioner-aws-ec2-windows
+        repo:
+          git: https://github.com/crafting-demo/provisioner-aws-ec2-windows.git
+        manifest:
+          overlays:
+            - content: |-
+                jobs:
+                  cleanup:
+                    run:
+                      cmd: ".sandbox/provision/lifecycle-asg/cleanup.sh"
+                    schedule: "*/10 * * * *"
+    env:
+      - AWS_CONFIG_FILE=/run/sandbox/fs/secrets/shared/AWS-CONFIG
+      - AWS_DEFAULT_REGION=us-east-2
+      - AVAILABILITY_ZONE=us-east-2a
+      - ASG_NAME=test-windows-provision
+      - EC2_SSH_KEY_FILE=/run/sandbox/fs/secrets/shared/sandbox-shared.pem
+overview: |
+  # Development with a Windows VM
+resources:
+  - name: windows
+    brief: EC2 Windows VM
+    details: |
+      EC2 Windows VM:
+
+      - Hostname: {{state.public_dns}}
+      - PublicIP: {{state.public_ip}}
+      ```
+      auto connect:i:1
+      full address:s:{{state.public_dns}}
+      username:s:Administrator
+      ```
+
+      Password can be found in `/run/sandbox/fs/resources/windows/state`.
+    handlers:
+      on_create:
+        timeout: 30m0s
+        save_state: true
+        use_workspace:
+          name: provisioner
+          run:
+            cmd: ./lifecycle.sh create
+            dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
+      on_delete:
+        max_retries: 3
+        timeout: 30m0s
+        use_workspace:
+          name: provisioner
+          run:
+            cmd: ./lifecycle.sh delete
+            dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
+      on_suspend:
+        max_retries: 3
+        timeout: 30m0s
+        use_workspace:
+          name: provisioner
+          run:
+            cmd: ./lifecycle.sh suspend
+            dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
+      on_resume:
+        timeout: 30m0s
+        save_state: true
+        use_workspace:
+          name: provisioner
+          run:
+            cmd: ./lifecycle.sh resume
+            dir: provisioner-aws-ec2-windows/.sandbox/provision/lifecycle-asg
