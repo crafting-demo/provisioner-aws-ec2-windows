@@ -28,7 +28,7 @@ function delete() {
     cleanup
 }
 
-set -ex
+set -ex -o pipefail
 cmd="$1"
 case "$cmd" in 
     create|resume)
