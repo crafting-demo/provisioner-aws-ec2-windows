@@ -63,7 +63,7 @@ cat <<EOF
         "value": "$VOLUME_ID"
     },
     "instance": {
-        "value: "$INSTANCE_ID"
+        "value": "$INSTANCE_ID"
     }
 }
 EOF
