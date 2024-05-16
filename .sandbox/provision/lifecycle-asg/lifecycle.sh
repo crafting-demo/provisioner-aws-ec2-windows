@@ -44,12 +44,26 @@ case "$cmd" in
 esac
 cat <<EOF 
 {
-    "sandbox_id": "$SANDBOX_ID",
-    "sandbox_name": "$SANDBOX_NAME",
-    "password": "$PASSWORD",
-    "public_dns": "$PUBLIC_DNS",
-    "public_ip": "$PUBLIC_IP",
-    "volume_id": "$VOLUME_ID",
-    "instance": "$INSTANCE_ID"
+    "sandbox_id": {
+        "value": "$SANDBOX_ID"
+    },
+    "sandbox_name": {
+        "value": "$SANDBOX_NAME"
+    },
+    "password": {
+        "value": "$PASSWORD"
+    },
+    "public_dns": {
+        "value": "$PUBLIC_DNS"
+    },
+    "public_ip": {
+        "value": "$PUBLIC_IP"
+    },
+    "volume_id": {
+        "value": "$VOLUME_ID"
+    },
+    "instance": {
+        "value: "$INSTANCE_ID"
+    }
 }
 EOF
